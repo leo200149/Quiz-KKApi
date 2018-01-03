@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>猜歌名</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="css/mp3-audio.css">
+    <link rel="stylesheet" href="css/app.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header clearfix">
+            <nav>
+                <ul class="nav nav-pills pull-right">
+                    <li role="presentation">
+                        <a href="#">Score: 0</a>
+                    </li>
+                </ul>
+            </nav>
+            <h3 class="text-muted"><i class="glyphicon glyphicon-headphones"> 猜歌名</i></h3>
+        </div>
+        <div class="row content">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-block">
+                        <div class="mp3-details">
+                            <a data-toggle="collapse" href="#details" aria-expanded="false" aria-controls="displayDetails">
+                                <span class="glyphicon glyphicon-music" aria-hidden="true"></span>
+                            </a>
+                        </div>
+                        <div class="collapse collapse-details" id="details">
+                            <img src="img/unknow.png" alt="unknow" class="img-thumbnail mp3-cover">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <span>Artist:</span>????</li>
+                                <li class="list-group-item">
+                                    <span>Title:</span>????</li>
+                                <li class="list-group-item">
+                                    <span>Album:</span>????</li>
+                                <li class="list-group-item">
+                                    <span>Year:</span>????</li>
+                            </ul>
+                        </div>
+                        <div class="mp3-audio">
+                            <audio controls class="mp3-auido" controlsList="nodownload" >
+                                <source src="http://blog.landr.com/wp-content/uploads/2017/07/LANDR-WAVY-neon.wav" type="audio/mpeg">
+                            </audio>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="col-lg-12">
+                <button type="button" class="btn btn-default btn-lg btn-block">
+                    <span>黃明志:</span>漂向北方</button>
+                <button type="button" class="btn btn-default btn-lg btn-block">
+                    <span>大壯:</span>我們不一樣</button>
+                <button type="button" class="btn btn-default btn-lg btn-block">
+                    <span>薛之謙:</span>演員</button>
+                <button type="button" class="btn btn-default btn-lg btn-block">
+                    <span>李玉剛:</span>剛好遇見你</button>
+            </div>
+        </div>
+    </div>
+    <!-- <footer class="footer">
+    </footer> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
