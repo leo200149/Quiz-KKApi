@@ -129,7 +129,7 @@ $(document).ready(function () {
         }else{
             var result = $('#template-failui').text();
             result = result.split('{score}').join(score);
-            result = result.split('{desc}').join(resultDescs[Math.floor(score/5)]);
+            result = result.split('{desc}').join(resultDescs[score>=40?3:Math.floor(score/10)]);
             resultUI.append(result);
             $('#resultBtn').bind('click',clickRestart);
         }
