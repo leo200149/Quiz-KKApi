@@ -72,12 +72,12 @@ margin-top: 1.5rem;
 }
 
 .wrong{
-    border-width: 2px;
+    border-width: 5px;
 	border-color: red;
 }
 .correct{
-    border-width: 2px;
-	border-color: green;
+    border-width: 5px;
+	border-color: greenyellow;
 }
 .kkbox-widget-iframe{
     width: 100%;

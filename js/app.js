@@ -80,14 +80,11 @@ $(document).ready(function () {
     function clickNextQuestion() {
         detailControl(false);
         nextQuestion();
-        updateDetailUI();
-        updateAnswerBtnUI();
-        updateScoreUI();
+        setTimeout(refreshUI,200);
     }
 
     function clickAnwserBtn() {
         $('.answerbtn').unbind('click');
-        $('.answerbtn').attr('disabled', true);
         var index = $(this).attr('answer');
         if (answers[index].id == currentQuestion.id) {
             canNext = true;
@@ -103,8 +100,8 @@ $(document).ready(function () {
                 }
             });
         }
-        updateScoreUI();
         updateResultUI();
+        updateScoreUI();
         detailControl(true);
     }
 
@@ -113,6 +110,13 @@ $(document).ready(function () {
         if (!isShow ? detailIsOpen : !detailIsOpen) {
             detailOpen.click();
         }
+    }
+
+    function refreshUI(){
+        updateDetailUI();
+        updateAnswerBtnUI();
+        updateResultUI();
+        updateScoreUI();
     }
 
     function updateResultUI(){
