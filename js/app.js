@@ -10,6 +10,7 @@ $(document).ready(function () {
     const TOKEN = 'Bearer KB7o8UDDDbsfRbAG6dl4BA==';
     var currentQuestion = null;
     var answers = null;
+    var currentAudioSrc = '';
     const resultDescs = ['快去KKBOX多聽一點歌','愛聽歌一族','歌本王者','歌本之神，沒有什麼難得倒你！'];
 
     function getRandomIndex(max) {
@@ -68,11 +69,34 @@ $(document).ready(function () {
         shuffleArray(answers);
     }
 
+    function initSongDetail(){
+        var playerId = currentQuestion.id;
+        updateDetailUI();
+        headIcon.button('loading');
+        $.ajax({
+            url: 'https://wd4zw4yb1k.execute-api.us-east-1.amazonaws.com/prod/quiz-kkbox',
+            type: 'GET',
+            data:{ id:playerId},
+            beforeSend: function (xhr) {
+            },
+            success: function (resp) {
+                currentAudioSrc = resp.content;
+                updateDetailUI();
+                updateResultUI();
+                headIcon.button('reset');
+            },
+            fail: function(resp){
+                console.log(resp);
+            }
+        });
+    }
+
     function clickRestart() {
         score = 0;
         canNext = true;
         currentQuestion = null;
         answers = null;
+        currentAudioSrc = '';
         questions = totalQuestions.slice();
         shuffleArray(questions);
         clickNextQuestion();
@@ -81,7 +105,9 @@ $(document).ready(function () {
     function clickNextQuestion() {
         detailControl(false);
         nextQuestion();
-        setTimeout(refreshUI,200);
+        initSongDetail();
+        updateAnswerBtnUI();
+        updateScoreUI();
     }
 
     function clickAnwserBtn() {
@@ -113,13 +139,6 @@ $(document).ready(function () {
         }
     }
 
-    function refreshUI(){
-        updateDetailUI();
-        updateAnswerBtnUI();
-        updateResultUI();
-        updateScoreUI();
-    }
-
     function updateResultUI(){
         var resultUI = $('#resultUI');
         resultUI.empty();
@@ -143,17 +162,14 @@ $(document).ready(function () {
     function updateDetailUI() {
         details.empty();
         var detailUI = $('#template-detailUI').text();
-        headIcon.button('loading');
-        detailUI = detailUI.split('{src}').join('https://widget.kkbox.com/v1/?id=' + currentQuestion.id + '&type=song&autoplay=true');
+        detailUI = detailUI.split('{src}').join(currentAudioSrc);
         detailUI = detailUI.split('{artist}').join(currentQuestion.album.artist.name);
         detailUI = detailUI.split('{title}').join(currentQuestion.name);
         detailUI = detailUI.split('{album}').join(currentQuestion.album.name);
         detailUI = detailUI.split('{year}').join(currentQuestion.album.release_date);
         details.append(detailUI);
         $('#nextQuestionBtn').bind('click', clickNextQuestion);
-        $('.kkbox-widget-iframe').bind('load', function(){
-            setTimeout(headIcon.button('reset'),200);
-        });
+        $('.mp3player')[0].play();
     }
 
     function updateAnswerBtnUI() {
