@@ -63,3 +63,23 @@ margin-top: 1.5rem;
     margin-bottom: 2rem;
 }
 }
+
+.noPadding{
+    padding: 0px;
+}
+.avoid-clicks {
+    pointer-events: none;
+}
+
+.wrong{
+    border-width: 2px;
+	border-color: red;
+}
+.correct{
+    border-width: 2px;
+	border-color: green;
+}
+.kkbox-widget-iframe{
+    width: 100%;
+    height: 100px;
+}
