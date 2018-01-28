@@ -2,6 +2,7 @@ $(document).ready(function () {
     $('#nextQuestion').bind('click', clickNextQuestion);
     var details = $('#details');
     var detailOpen = $('#detailOpen');
+    var headIcon = $('#headIcon');
     var totalQuestions = [];
     var questions = [];
     var score = 0;
@@ -142,6 +143,7 @@ $(document).ready(function () {
     function updateDetailUI() {
         details.empty();
         var detailUI = $('#template-detailUI').text();
+        headIcon.button('loading');
         detailUI = detailUI.split('{src}').join('https://widget.kkbox.com/v1/?id=' + currentQuestion.id + '&type=song&autoplay=true');
         detailUI = detailUI.split('{artist}').join(currentQuestion.album.artist.name);
         detailUI = detailUI.split('{title}').join(currentQuestion.name);
@@ -149,6 +151,9 @@ $(document).ready(function () {
         detailUI = detailUI.split('{year}').join(currentQuestion.album.release_date);
         details.append(detailUI);
         $('#nextQuestionBtn').bind('click', clickNextQuestion);
+        $('.kkbox-widget-iframe').bind('load', function(){
+            setTimeout(headIcon.button('reset'),200);
+        });
     }
 
     function updateAnswerBtnUI() {
