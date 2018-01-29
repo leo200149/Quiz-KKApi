@@ -72,7 +72,6 @@ $(document).ready(function () {
 
     function initSongDetail(){
         var playerId = currentQuestion.id;
-        updateDetailUI();
         headIcon.button('loading');
         $.ajax({
             url: 'https://2rx2xb9xak.execute-api.us-east-1.amazonaws.com/prod/quiz-kkbox',
@@ -108,8 +107,8 @@ $(document).ready(function () {
         detailControl(false);
         nextQuestion();
         initSongDetail();
-        updateAnswerBtnUI();
         updateScoreUI();
+        setTimeout(updateAnswerBtnUI,200);
     }
 
     function clickAnwserBtn() {
@@ -165,13 +164,16 @@ $(document).ready(function () {
         details.empty();
         var detailUI = $('#template-detailUI').text();
         detailUI = detailUI.split('{src}').join(currentAudioSrc);
+        detailUI = detailUI.split('{url}').join(currentQuestion.url);
+        detailUI = detailUI.split('{image}').join(currentQuestion.album.images[0].url);
         detailUI = detailUI.split('{artist}').join(currentQuestion.album.artist.name);
         detailUI = detailUI.split('{title}').join(currentQuestion.name);
         detailUI = detailUI.split('{album}').join(currentQuestion.album.name);
         detailUI = detailUI.split('{year}').join(currentQuestion.album.release_date);
         details.append(detailUI);
         $('#nextQuestionBtn').bind('click', clickNextQuestion);
-        $('.mp3player')[0].play();
+        var audio = $('.mp3-player')[0];
+        audio.play();
     }
 
     function updateAnswerBtnUI() {

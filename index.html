@@ -44,10 +44,19 @@
     <script type="text" id="template-detailUI">
         <ul class="list-group">
             <li class="list-group-item noPadding">
-                <div>
-                    <audio class="mp3player" src="{src}" controls>
-                        Your browser does not support the audio element.
-                    </audio>
+                <div class="media">
+                    <div class="media-left media-middle">
+                        <a href="{url}" target="_blank">
+                            <img class="media-object" src="{image}">
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <h5 class="media-heading"><a href="{url}" target="_blank">{title}</a></h5>
+                        <br>
+                        <audio class="mp3-player" src="{src}" controls controlsList="nodownload">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
                 </div></li>
             <li class="list-group-item">
                 <span>Artist:</span>{artist}</li>

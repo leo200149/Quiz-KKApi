@@ -116,7 +116,13 @@ ul li span {
     border-width: 5px;
 	border-color: greenyellow;
 }
-.mp3player{
+.mp3-player{
     width: 100%;
-    height: 100px;
+}
+.media .media-object{
+    padding:2px;
+    height: 60%;
+}
+.media .media-body{
+    padding:5px;
 }
