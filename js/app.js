@@ -12,6 +12,8 @@ $(document).ready(function () {
     var currentQuestion = null;
     var answers = null;
     var currentAudioSrc = '';
+    var currentAudio = null;
+    var hiddenAudio = null;
     const resultDescs = ['快去KKBOX多聽一點歌','愛聽歌一族','歌本王者','歌本之神，沒有什麼難得倒你！'];
 
     function getRandomIndex(max) {
@@ -38,11 +40,14 @@ $(document).ready(function () {
             },
             success: function (resp) {
                 totalQuestions = resp.tracks.data;
-                clickRestart();
+                $('#startAlertBtn').click();
             },
             fail: function(resp){
                 console.log(resp);
             }
+        });
+        $('#startBtn').bind('click',function(){
+            clickRestart();
         });
     }
 
@@ -98,12 +103,15 @@ $(document).ready(function () {
         currentQuestion = null;
         answers = null;
         currentAudioSrc = '';
+        currentAudio = null;
+        hiddenAudio = null;
         questions = totalQuestions.slice();
         shuffleArray(questions);
         clickNextQuestion();
     }
 
     function clickNextQuestion() {
+        audioPause();
         detailControl(false);
         nextQuestion();
         initSongDetail();
@@ -128,9 +136,22 @@ $(document).ready(function () {
                 }
             });
         }
+        audioPause();
+        currentAudio = $('.mp3-player')[0];
+        currentAudio.currentTime = hiddenAudio.currentTime;
+        currentAudio.play();
         updateResultUI();
         updateScoreUI();
         detailControl(true);
+    }
+
+    function audioPause(){
+        if(currentAudio){
+            currentAudio.pause();
+        }
+        if(hiddenAudio){
+            hiddenAudio.pause();
+        }
     }
 
     function detailControl(isShow) {
@@ -163,6 +184,7 @@ $(document).ready(function () {
     function updateDetailUI() {
         details.empty();
         var detailUI = $('#template-detailUI').text();
+        $('#playerSource').attr('src', currentAudioSrc);
         detailUI = detailUI.split('{src}').join(currentAudioSrc);
         detailUI = detailUI.split('{url}').join(currentQuestion.url);
         detailUI = detailUI.split('{image}').join(currentQuestion.album.images[0].url);
@@ -172,8 +194,9 @@ $(document).ready(function () {
         detailUI = detailUI.split('{year}').join(currentQuestion.album.release_date);
         details.append(detailUI);
         $('#nextQuestionBtn').bind('click', clickNextQuestion);
-        var audio = $('.mp3-player')[0];
-        audio.play();
+        hiddenAudio = $("#hiddenPlayer")[0];
+        hiddenAudio.load();
+        hiddenAudio.play();
     }
 
     function updateAnswerBtnUI() {
