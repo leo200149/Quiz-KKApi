@@ -36,6 +36,9 @@ exports.handler = function (event, context, callback) {
     }else{
          callback(null, {
             "statusCode": 200,
+            "headers": { 
+                "Access-Control-Allow-Origin": "*" 
+            },
             "body": JSON.stringify({resultCode:0}),
             "isBase64Encoded": false
         });

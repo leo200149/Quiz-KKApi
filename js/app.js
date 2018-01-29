@@ -8,6 +8,7 @@ $(document).ready(function () {
     var score = 0;
     var canNext = true;
     const TOKEN = 'Bearer KB7o8UDDDbsfRbAG6dl4BA==';
+    const XAPIKEY = 'ilGN6uwDsg4UY39qVNIDw0aq6fJeqBC2QvHuvLRf';
     var currentQuestion = null;
     var answers = null;
     var currentAudioSrc = '';
@@ -74,10 +75,11 @@ $(document).ready(function () {
         updateDetailUI();
         headIcon.button('loading');
         $.ajax({
-            url: 'https://wd4zw4yb1k.execute-api.us-east-1.amazonaws.com/prod/quiz-kkbox',
+            url: 'https://2rx2xb9xak.execute-api.us-east-1.amazonaws.com/prod/quiz-kkbox',
             type: 'GET',
             data:{ id:playerId},
             beforeSend: function (xhr) {
+                xhr.setRequestHeader('X-Api-Key',XAPIKEY);
             },
             success: function (resp) {
                 currentAudioSrc = resp.content;
