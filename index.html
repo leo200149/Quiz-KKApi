@@ -42,8 +42,8 @@
         </div>
     </div>
     <!-- Small modal -->
-    <button type="button" class="btn btn-primary" id="startAlertBtn" data-toggle="modal" data-target=".bs-example-modal-sm" style="display:none"></button>
-    <div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog">
+    <button type="button" class="btn btn-primary" id="startAlertBtn" data-toggle="modal" data-target="#startModal" style="display:none"></button>
+    <div class="modal fade bs-example-modal-sm" tabindex="-1" id="startModal" role="dialog">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -52,6 +52,21 @@
                 <div class="modal-body">
                     <center>
                         <button type="button" class="btn btn-success btn-lg" id="startBtn" data-dismiss="modal">遊戲開始</button>
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button type="button" class="btn btn-primary" id="loadingBtn" data-toggle="modal" data-target="#loadingModal" style="display:none"></button>
+    <div class="modal fade bs-example-modal-sm" tabindex="-1" id="loadingModal" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-center">KKBOX華語音樂榜猜謎</h4>
+                </div>
+                <div class="modal-body">
+                    <center>
+                        <h2>Loading...</h2>
                     </center>
                 </div>
             </div>

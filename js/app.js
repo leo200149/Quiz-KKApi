@@ -2,6 +2,8 @@ $(document).ready(function () {
     const TOKEN = 'Bearer KB7o8UDDDbsfRbAG6dl4BA==';
     const XAPIKEY = 'ilGN6uwDsg4UY39qVNIDw0aq6fJeqBC2QvHuvLRf';
     const resultDescs = ['快去KKBOX多聽一點歌','愛聽歌一族','歌本王者','歌本之神，沒有什麼難得倒你！'];
+    const startAlertBtn = $('#startAlertBtn');
+    const loadingBtn = $('#loadingBtn');
     var details = $('#details');
     var detailOpen = $('#detailOpen');
     var headIcon = $('#headIcon');
@@ -10,7 +12,7 @@ $(document).ready(function () {
     var score = 0;
     var canNext = true;
     var currentQuestion = null;
-    var answers = null;
+    var nextQuestion = null;
     $('#startBtn').bind('click',clickNextQuestion);
 
     function log(msg){
@@ -42,6 +44,7 @@ $(document).ready(function () {
     }
 
     function init() {
+        loadingBtn.click();
         var dfd = $.Deferred();
         dfd.then(function(resp) {
             return loadQuestionData();
@@ -50,8 +53,11 @@ $(document).ready(function () {
             return shuffleQuestions();
         },error).then(function(resp){
             questions = resp;
-            $('#startAlertBtn').click();
-        },error);
+            return initNextQuestion();
+        },error).then(function(){
+            loadingBtn.click();
+            startAlertBtn.click();
+        });
         dfd.resolve();
     }
 
@@ -86,28 +92,28 @@ $(document).ready(function () {
         return dfd.promise();
     }
 
-    function initQuestion(){
-        log('initQuestion...');
+    function initNextQuestion(){
+        log('initNextQuestion...');
         var dfd = $.Deferred();
         prepareQuestion()
         .then(function(resp) {
-            answers = resp.answers;
-            currentQuestion = resp.currentQuestion;
-            return getQuestionAudioSrc(currentQuestion);
-        },error).then(function(currentAudioSrc){
-            currentQuestion.audioSrc = currentAudioSrc;
-            log('initQuestion end');
+            nextQuestion = resp;
+            return getQuestionAudioSrc(nextQuestion);
+        },error)
+        .then(function(nextAudioSrc){
+            nextQuestion.audioSrc = nextAudioSrc;
+            log('initNextQuestion end');
             dfd.resolve();
-        },error);
+        });
         return dfd.promise();
     }
 
     function prepareQuestion() {
         var dfd = $.Deferred();
         log('prepareQuestion...');
-        var currentQuestion = questions.pop();
+        var nextQuestion = questions.pop();
         var answerQuestions = [];
-        answerQuestions.push(currentQuestion);
+        answerQuestions.push(nextQuestion);
         for (var i = 0; i < 3; i++) {
             var question = totalQuestions[getRandomIndex(totalQuestions.length)];
             while (answerQuestions.includes(question)) {
@@ -115,16 +121,14 @@ $(document).ready(function () {
             }
             answerQuestions.push(question);
         }
-        answers = [];
+        var answers = [];
         for (var i = 0; i < answerQuestions.length; i++) {
             var answerQuestion = answerQuestions[i];
             answers.push({ id: answerQuestion.id, singer: answerQuestion.album.artist.name, song: answerQuestion.name });
         }
         shuffleArray(answers);
-        dfd.resolve({
-            currentQuestion:currentQuestion,
-            answers:answers
-        });
+        nextQuestion.answers = answers;
+        dfd.resolve(nextQuestion);
         return dfd.promise();
     }
 
@@ -151,34 +155,36 @@ $(document).ready(function () {
     }
 
     function clickRestart() {
+        loadingBtn.click();
         score = 0;
         canNext = true;
         currentQuestion = null;
-        answers = null;
-        shuffleQuestions();
-        clickNextQuestion();
+        nextQuestion = null;
+        shuffleQuestions().then(function(resp){
+            questions = resp;
+            return initNextQuestion();
+        },error).then(function(){
+            loadingBtn.click();
+            startAlertBtn.click();
+        });
     }
 
     function clickNextQuestion() {
         log('clickNextQuestion...');
+        currentQuestion = nextQuestion;
         detailControl(false);
-        var dfd = $.Deferred();
-        dfd.then(function(resp){
-            return initQuestion();
-        },error).then(function(resp){
-            log('updateNextQuestion UI...');
-            updateDetailUI();
-            updateScoreUI();
-            updateAnswerBtnUI();
-            var audio = $('.mp3-player')[0];
-            audio.play();
-        },error);
-        dfd.resolve();
+        updateDetailUI();
+        updateScoreUI();
+        updateAnswerBtnUI();
+        var audio = $('.mp3-player')[0];
+        audio.play();
+        initNextQuestion();
     }
 
     function clickAnwserBtn() {
         $('.answerbtn').unbind('click');
         var index = $(this).attr('answer');
+        var answers = currentQuestion.answers;
         if (answers[index].id == currentQuestion.id) {
             canNext = true;
             score++;
@@ -242,6 +248,7 @@ $(document).ready(function () {
 
     function updateAnswerBtnUI() {
         $('#answerbtns').empty();
+        var answers = currentQuestion.answers;
         for (var i in answers) {
             var answer = answers[i];
             var btn = $('#template-answerbtn').text();
