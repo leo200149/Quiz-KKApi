@@ -31,16 +31,9 @@ $(document).ready(function () {
             array[j] = temp;
         }
     }
-
-    function wait(ms) {
-        var deferred = $.Deferred();
-        setTimeout(deferred.resolve, ms);
-       // We just need to return the promise not the whole deferred.
-       return deferred.promise();
-    }
   
     function error(resp){
-        console.log(resp);
+        log(resp);
     }
 
     function init() {
@@ -173,12 +166,15 @@ $(document).ready(function () {
         log('clickNextQuestion...');
         currentQuestion = nextQuestion;
         detailControl(false);
-        updateDetailUI();
-        updateScoreUI();
-        updateAnswerBtnUI();
-        var audio = $('.mp3-player')[0];
-        audio.play();
-        initNextQuestion();
+        function update(){
+            updateDetailUI();
+            updateScoreUI();
+            updateAnswerBtnUI();
+            var audio = $('.mp3-player')[0];
+            audio.play();
+            initNextQuestion();
+        }
+        setTimeout(update,500);
     }
 
     function clickAnwserBtn() {
