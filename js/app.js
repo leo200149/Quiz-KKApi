@@ -1,5 +1,7 @@
 $(document).ready(function () {
-    $('#nextQuestion').bind('click', clickNextQuestion);
+    const TOKEN = 'Bearer KB7o8UDDDbsfRbAG6dl4BA==';
+    const XAPIKEY = 'ilGN6uwDsg4UY39qVNIDw0aq6fJeqBC2QvHuvLRf';
+    const resultDescs = ['快去KKBOX多聽一點歌','愛聽歌一族','歌本王者','歌本之神，沒有什麼難得倒你！'];
     var details = $('#details');
     var detailOpen = $('#detailOpen');
     var headIcon = $('#headIcon');
@@ -7,12 +9,13 @@ $(document).ready(function () {
     var questions = [];
     var score = 0;
     var canNext = true;
-    const TOKEN = 'Bearer KB7o8UDDDbsfRbAG6dl4BA==';
-    const XAPIKEY = 'ilGN6uwDsg4UY39qVNIDw0aq6fJeqBC2QvHuvLRf';
     var currentQuestion = null;
     var answers = null;
-    var currentAudioSrc = '';
-    const resultDescs = ['快去KKBOX多聽一點歌','愛聽歌一族','歌本王者','歌本之神，沒有什麼難得倒你！'];
+    $('#startBtn').bind('click',clickNextQuestion);
+
+    function log(msg){
+        console.log(msg);
+    }
 
     function getRandomIndex(max) {
         return Math.floor(Math.random() * (max));
@@ -27,7 +30,34 @@ $(document).ready(function () {
         }
     }
 
+    function wait(ms) {
+        var deferred = $.Deferred();
+        setTimeout(deferred.resolve, ms);
+       // We just need to return the promise not the whole deferred.
+       return deferred.promise();
+    }
+  
+    function error(resp){
+        console.log(resp);
+    }
+
     function init() {
+        var dfd = $.Deferred();
+        dfd.then(function(resp) {
+            return loadQuestionData();
+        },error).then(function(resp) {
+            totalQuestions = resp;
+            return shuffleQuestions();
+        },error).then(function(resp){
+            questions = resp;
+            $('#startAlertBtn').click();
+        },error);
+        dfd.resolve();
+    }
+
+    function loadQuestionData(){
+        var dfd = $.Deferred();
+        log('loadQuestionData...');
         var playlistId = '0kTVCy_kzou3AdOsAc';
         $.ajax({
             url: 'https://api.kkbox.com/v1.1/charts/' + playlistId + '?territory=TW',
@@ -37,22 +67,45 @@ $(document).ready(function () {
                 xhr.setRequestHeader("authorization", TOKEN);
             },
             success: function (resp) {
-                totalQuestions = resp.tracks.data;
-                clickRestart();
+                dfd.resolve(resp.tracks.data);
             },
             fail: function(resp){
-                console.log(resp);
+                log(resp);
+                dfd.reject();
             }
         });
+        return dfd.promise();
     }
 
-    function initQuestions() {
-        questions = totalQuestions.slice();
+    function shuffleQuestions() {
+        var dfd = $.Deferred();
+        log('shuffleQuestions...');
+        var questions = totalQuestions.slice();
         shuffleArray(questions);
+        dfd.resolve(questions);
+        return dfd.promise();
     }
 
-    function nextQuestion() {
-        currentQuestion = questions.pop();
+    function initQuestion(){
+        log('initQuestion...');
+        var dfd = $.Deferred();
+        prepareQuestion()
+        .then(function(resp) {
+            answers = resp.answers;
+            currentQuestion = resp.currentQuestion;
+            return getQuestionAudioSrc(currentQuestion);
+        },error).then(function(currentAudioSrc){
+            currentQuestion.audioSrc = currentAudioSrc;
+            log('initQuestion end');
+            dfd.resolve();
+        },error);
+        return dfd.promise();
+    }
+
+    function prepareQuestion() {
+        var dfd = $.Deferred();
+        log('prepareQuestion...');
+        var currentQuestion = questions.pop();
         var answerQuestions = [];
         answerQuestions.push(currentQuestion);
         for (var i = 0; i < 3; i++) {
@@ -68,11 +121,17 @@ $(document).ready(function () {
             answers.push({ id: answerQuestion.id, singer: answerQuestion.album.artist.name, song: answerQuestion.name });
         }
         shuffleArray(answers);
+        dfd.resolve({
+            currentQuestion:currentQuestion,
+            answers:answers
+        });
+        return dfd.promise();
     }
 
-    function initSongDetail(){
-        var playerId = currentQuestion.id;
-        headIcon.button('loading');
+    function getQuestionAudioSrc(question){
+        var dfd = $.Deferred();
+        log('getQuestionAudioSrc...');
+        var playerId = question.id;
         $.ajax({
             url: 'https://2rx2xb9xak.execute-api.us-east-1.amazonaws.com/prod/quiz-kkbox',
             type: 'GET',
@@ -81,15 +140,14 @@ $(document).ready(function () {
                 xhr.setRequestHeader('X-Api-Key',XAPIKEY);
             },
             success: function (resp) {
-                currentAudioSrc = resp.content;
-                updateDetailUI();
-                updateResultUI();
-                headIcon.button('reset');
+                dfd.resolve(resp.content);
             },
             fail: function(resp){
-                console.log(resp);
+                log(resp);
+                dfd.reject(resp);
             }
         });
+        return dfd.promise();
     }
 
     function clickRestart() {
@@ -97,18 +155,25 @@ $(document).ready(function () {
         canNext = true;
         currentQuestion = null;
         answers = null;
-        currentAudioSrc = '';
-        questions = totalQuestions.slice();
-        shuffleArray(questions);
+        shuffleQuestions();
         clickNextQuestion();
     }
 
     function clickNextQuestion() {
+        log('clickNextQuestion...');
         detailControl(false);
-        nextQuestion();
-        initSongDetail();
-        updateScoreUI();
-        setTimeout(updateAnswerBtnUI,200);
+        var dfd = $.Deferred();
+        dfd.then(function(resp){
+            return initQuestion();
+        },error).then(function(resp){
+            log('updateNextQuestion UI...');
+            updateDetailUI();
+            updateScoreUI();
+            updateAnswerBtnUI();
+            var audio = $('.mp3-player')[0];
+            audio.play();
+        },error);
+        dfd.resolve();
     }
 
     function clickAnwserBtn() {
@@ -161,9 +226,10 @@ $(document).ready(function () {
     }
 
     function updateDetailUI() {
+        console.log(currentQuestion.audioSrc);
         details.empty();
         var detailUI = $('#template-detailUI').text();
-        detailUI = detailUI.split('{src}').join(currentAudioSrc);
+        detailUI = detailUI.split('{src}').join(currentQuestion.audioSrc);
         detailUI = detailUI.split('{url}').join(currentQuestion.url);
         detailUI = detailUI.split('{image}').join(currentQuestion.album.images[0].url);
         detailUI = detailUI.split('{artist}').join(currentQuestion.album.artist.name);
@@ -172,8 +238,6 @@ $(document).ready(function () {
         detailUI = detailUI.split('{year}').join(currentQuestion.album.release_date);
         details.append(detailUI);
         $('#nextQuestionBtn').bind('click', clickNextQuestion);
-        var audio = $('.mp3-player')[0];
-        audio.play();
     }
 
     function updateAnswerBtnUI() {
