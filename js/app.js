@@ -4,16 +4,15 @@ $(document).ready(function () {
     const resultDescs = ['快去KKBOX多聽一點歌','愛聽歌一族','歌本王者','歌本之神，沒有什麼難得倒你！'];
     const startAlertBtn = $('#startAlertBtn');
     const loadingBtn = $('#loadingBtn');
-    var details = $('#details');
-    var detailOpen = $('#detailOpen');
-    var headIcon = $('#headIcon');
+    const details = $('#details');
+    const detailOpen = $('#detailOpen');
+    const startBtn = $('#startBtn');
     var totalQuestions = [];
     var questions = [];
     var score = 0;
     var canNext = true;
     var currentQuestion = null;
     var nextQuestion = null;
-    $('#startBtn').bind('click',clickNextQuestion);
 
     function log(msg){
         console.log(msg);
@@ -36,22 +35,14 @@ $(document).ready(function () {
         log(resp);
     }
 
-    function init() {
+    async function init() {
         loadingBtn.click();
-        var dfd = $.Deferred();
-        dfd.then(function(resp) {
-            return loadQuestionData();
-        },error).then(function(resp) {
-            totalQuestions = resp;
-            return shuffleQuestions();
-        },error).then(function(resp){
-            questions = resp;
-            return initNextQuestion();
-        },error).then(function(){
-            loadingBtn.click();
-            startAlertBtn.click();
-        });
-        dfd.resolve();
+        totalQuestions = await loadQuestionData();
+        questions = shuffleQuestions();
+        nextQuestion = await initNextQuestion();
+        startBtn.bind('click',clickNextQuestion);
+        loadingBtn.click();
+        startAlertBtn.click();
     }
 
     function loadQuestionData(){
@@ -73,55 +64,6 @@ $(document).ready(function () {
                 dfd.reject();
             }
         });
-        return dfd.promise();
-    }
-
-    function shuffleQuestions() {
-        var dfd = $.Deferred();
-        log('shuffleQuestions...');
-        var questions = totalQuestions.slice();
-        shuffleArray(questions);
-        dfd.resolve(questions);
-        return dfd.promise();
-    }
-
-    function initNextQuestion(){
-        log('initNextQuestion...');
-        var dfd = $.Deferred();
-        prepareQuestion()
-        .then(function(resp) {
-            nextQuestion = resp;
-            return getQuestionAudioSrc(nextQuestion);
-        },error)
-        .then(function(nextAudioSrc){
-            nextQuestion.audioSrc = nextAudioSrc;
-            log('initNextQuestion end');
-            dfd.resolve();
-        });
-        return dfd.promise();
-    }
-
-    function prepareQuestion() {
-        var dfd = $.Deferred();
-        log('prepareQuestion...');
-        var nextQuestion = questions.pop();
-        var answerQuestions = [];
-        answerQuestions.push(nextQuestion);
-        for (var i = 0; i < 3; i++) {
-            var question = totalQuestions[getRandomIndex(totalQuestions.length)];
-            while (answerQuestions.includes(question)) {
-                question = totalQuestions[getRandomIndex(totalQuestions.length)];
-            }
-            answerQuestions.push(question);
-        }
-        var answers = [];
-        for (var i = 0; i < answerQuestions.length; i++) {
-            var answerQuestion = answerQuestions[i];
-            answers.push({ id: answerQuestion.id, singer: answerQuestion.album.artist.name, song: answerQuestion.name });
-        }
-        shuffleArray(answers);
-        nextQuestion.answers = answers;
-        dfd.resolve(nextQuestion);
         return dfd.promise();
     }
 
@@ -147,32 +89,65 @@ $(document).ready(function () {
         return dfd.promise();
     }
 
-    function clickRestart() {
+    function shuffleQuestions() {
+        log('shuffleQuestions...');
+        var questions = totalQuestions.slice();
+        shuffleArray(questions);
+        return questions;
+    }
+
+    async function initNextQuestion(){
+        log('initNextQuestion...');
+        var nextQuestion = prepareQuestion();
+        nextQuestion.audioSrc = await getQuestionAudioSrc(nextQuestion);
+        return nextQuestion;
+    }
+
+    function prepareQuestion() {
+        log('prepareQuestion...');
+        var nextQuestion = questions.pop();
+        var answerQuestions = [];
+        answerQuestions.push(nextQuestion);
+        for (var i = 0; i < 3; i++) {
+            var question = totalQuestions[getRandomIndex(totalQuestions.length)];
+            while (answerQuestions.includes(question)) {
+                question = totalQuestions[getRandomIndex(totalQuestions.length)];
+            }
+            answerQuestions.push(question);
+        }
+        var answers = [];
+        for (var i = 0; i < answerQuestions.length; i++) {
+            var answerQuestion = answerQuestions[i];
+            answers.push({ id: answerQuestion.id, singer: answerQuestion.album.artist.name, song: answerQuestion.name });
+        }
+        shuffleArray(answers);
+        nextQuestion.answers = answers;
+        return nextQuestion;
+    }
+
+    async function clickRestart() {
         loadingBtn.click();
         score = 0;
         canNext = true;
         currentQuestion = null;
         nextQuestion = null;
-        shuffleQuestions().then(function(resp){
-            questions = resp;
-            return initNextQuestion();
-        },error).then(function(){
-            loadingBtn.click();
-            startAlertBtn.click();
-        });
+        questions = shuffleQuestions();
+        nextQuestion = await initNextQuestion();
+        loadingBtn.click();
+        startAlertBtn.click();
     }
 
     function clickNextQuestion() {
         log('clickNextQuestion...');
         currentQuestion = nextQuestion;
         detailControl(false);
-        function update(){
+        async function update(){
             updateDetailUI();
             updateScoreUI();
             updateAnswerBtnUI();
             var audio = $('.mp3-player')[0];
             audio.play();
-            initNextQuestion();
+            nextQuestion = await initNextQuestion();
         }
         setTimeout(update,500);
     }
