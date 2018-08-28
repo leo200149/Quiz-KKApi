@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    const TOKEN = 'Bearer fpeg6J4CHjzcuYOeXsTx9A==';
+    const TOKEN = 'Bearer QRZ+1SKqFdviM9NpqmaHPg==';
     const XAPIKEY = 'ilGN6uwDsg4UY39qVNIDw0aq6fJeqBC2QvHuvLRf';
     const resultDescs = ['快去KKBOX多聽一點歌','愛聽歌一族','歌本王者','歌本之神，沒有什麼難得倒你！'];
     const startAlertBtn = $('#startAlertBtn');
